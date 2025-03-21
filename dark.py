@@ -359,7 +359,7 @@ def final_mountain_ascent():
 
 # Wolf Encounter Logic
 # ---------------------------
-1def fight_dire_wolf(fight_mode):
+def fight_dire_wolf(fight_mode):
     """
     This function handles all the Dire Wolf's combat logic, including
     skip-turns if someone rolls a 1, etc.
