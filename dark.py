@@ -88,7 +88,7 @@ def game_over():
     print("\nYour vision fades as you succumb to your wounds...")
     print("The world slips away into darkness.")
 
-    input("\nPress ENTER to restart the game.")
+    wait_for_enter("\nPress ENTER to restart the game.")
     reset_game_state()  # Reset everything
     main()              # Start fresh
 
