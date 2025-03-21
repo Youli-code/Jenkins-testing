@@ -109,14 +109,34 @@ def open_inventory_menu(current_menu_func):
     current_menu_func()
 
 def get_player_choice(prompt, valid_options, retry_function):
+    if game_state.get("auto") and game_state["auto_choices"]:
+        choice = game_state["auto_choices"].pop(0)
+        print(f"[AUTO CHOICE] {prompt.strip()} → {choice}")
+        if choice in valid_options:
+            return choice
+        else:
+            print(f"[AUTO ERROR] Invalid choice: {choice}")
+            return retry_function()
+
+    # Fallback to manual input
     choice = input(prompt)
     if choice in valid_options:
         return choice
     print("Invalid choice.")
-    retry_function()
-    return None
+    return retry_function()
+
 
 def get_player_answer(prompt, allowed_responses, retry_func):
+    if game_state.get("auto") and game_state["auto_choices"]:
+        ans = game_state["auto_choices"].pop(0).upper()
+        print(f"[AUTO ANSWER] {prompt.strip()} → {ans}")
+        if ans in allowed_responses:
+            return ans
+        else:
+            print(f"[AUTO ERROR] Invalid answer: {ans}")
+            return retry_func()
+
+    # Fallback to manual input
     ans = input(prompt)
     if ans.upper() in allowed_responses:
         return ans.upper()
@@ -318,18 +338,24 @@ def check_ark():
         print("You press on, climbing for many hours along a winding path inside the mountain...")
         final_mountain_ascent()
 
+def wait_for_enter(message="Press ENTER to continue..."):
+    if game_state.get("auto"):
+        print(f"[AUTO] {message}")
+        return
+    input(message)
+
 def final_mountain_ascent():
     print("\nAfter countless hours of wandering and walking,")
     print("you finally emerge onto a vast plateau near the mountain's summit.")
     print("The bitter cold stings your skin, and dark clouds swirl overhead...")
 
-    input("\nPress ENTER to continue...")
+    wait_for_enter("\nPress ENTER to continue...")
 
     print("\nThunder rumbles in the distance, and lightning illuminates a colossal silhouette in the clouds.")
     print("The shape descends, revealing a mighty Dragon, scales shimmering with arcane energy.")
     print("Wind whips across the plateau, carrying the beast's thunderous roar into your very bones.")
 
-    input("\n(Press ENTER to brace yourself for the final battle...)")
+    wait_for_enter("\n(Press ENTER to brace yourself for the final battle...)")
 
     fight_mode = get_player_answer(
         "\nWill you fight the Dragon in Automatic or Manual mode? (A/M): ",
@@ -685,6 +711,12 @@ def calculate_damage_dealt_for_player(attacker_power, defender_ac):
 def parse_args():
     parser = argparse.ArgumentParser(description="Dark RPG CLI Mode")
     parser.add_argument("--auto", action="store_true", help="Run the game in non-interactive auto mode")
+    
+    parser.add_argument(
+    "--script",
+    help="Path to file containing predefined input choices",
+    type=str
+)
     return parser.parse_args()
 
 
@@ -693,6 +725,19 @@ def parse_args():
 # ---------------------------
 def main():
     args = parse_args()
+
+    # Set up global flags
+    game_state["auto"] = args.auto
+    game_state["auto_choices"] = []
+
+    if args.script:
+        try:
+            with open(args.script, 'r') as f:
+                game_state["auto_choices"] = [line.strip() for line in f if line.strip()]
+        except FileNotFoundError:
+            print(f"[ERROR] Script file not found: {args.script}")
+            sys.exit(1)
+
     game_introduction()
     setup_player(auto=args.auto)
     choose_location()
