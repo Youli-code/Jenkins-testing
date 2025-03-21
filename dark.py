@@ -375,7 +375,7 @@ def final_mountain_ascent():
     print("\nBeyond the mountain peak lies freedom—or perhaps even greater adventures. But for now, victory is yours.")
     print("\nCONGRATULATIONS, HERO! You have prevailed over the dragon and completed this quest.")
 
-    input("\nPress ENTER to exit the game - Thank you for playing!")
+    wait_for_enter("\nPress ENTER to exit the game - Thank you for playing!")
     sys.exit(0)  # Quits the program entirely
 
 
