@@ -5,7 +5,7 @@ pipeline {
         stage('Run DARK') {
             steps {
                 echo "🧙‍♂️ Launching the Dark RPG..."
-                sh 'python3 dark.py'
+                sh 'python3 dark.py --auto'
             }
         }
     }

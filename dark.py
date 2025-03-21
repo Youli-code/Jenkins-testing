@@ -1,5 +1,6 @@
 import random
 import sys
+import argparse
 
 # ---------------------------
 # Global game state
@@ -63,19 +64,17 @@ def game_introduction():
     print("Shadows dance along the jagged walls as the dim torchlight flickers.")
     print("The last thing you remember is falling into darkness. Now, you must find a way out...")
 
-def setup_player():
-    """
-    Player's HP is fixed at 100. They still choose Attack Power & Armor Class.
-    """
-    global game_state
-    # HP is fixed:
-    game_state["player_health"] = 100
-    game_state["player_max_health"] = 100
-
-    # Let them choose Attack Power & AC.
-    game_state["attack_power"] = int(input("Enter Attack Power: "))
-    ac_input = int(input("Enter Armor Class (Max 20): "))
-    game_state["armor_class"] = min(ac_input, 20)
+def setup_player(auto=False):
+    if auto:
+        print("\n[Auto Mode] Using default player stats...")
+        game_state["attack_power"] = 10
+        game_state["armor_class"] = 15
+        print(f"Attack Power: {game_state['attack_power']}")
+        print(f"Armor Class: {game_state['armor_class']}")
+    else:
+        game_state["attack_power"] = int(input("Enter Attack Power: "))
+        ac_input = int(input("Enter Armor Class (Max 20): "))
+        game_state["armor_class"] = min(ac_input, 20)
 
     print("\nDespite feeling a wave of nausea, you finally stumble out of the cave.")
     print("Outside, you spot small animal corpses and a few broken logs scattered about.")
@@ -683,12 +682,19 @@ def calculate_damage_dealt_for_player(attacker_power, defender_ac):
         print("Missed the attack!")
         return 0, False
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Dark RPG CLI Mode")
+    parser.add_argument("--auto", action="store_true", help="Run the game in non-interactive auto mode")
+    return parser.parse_args()
+
+
 # ---------------------------
 # Game Start
 # ---------------------------
 def main():
+    args = parse_args()
     game_introduction()
-    setup_player()
+    setup_player(auto=args.auto)
     choose_location()
 
 if __name__ == "__main__":
