@@ -2,26 +2,28 @@ pipeline {
     agent any
 
     stages {
-        stage('Run Dark with Logs') {
+        stage('Run Dark in Docker') {
             steps {
-                echo '⚔️ Running Dark RPG in auto mode, capturing output...'
-                // Run the game & capture all console output in dark_run.log
-                sh 'python3 dark.py --auto --script master_script.txt > dark_run.log'
+                echo '🐳 Building and Running Dark RPG inside Docker container...'
+                sh 'docker build -t dark-rpg .'
+                sh 'docker run --rm dark-rpg > dark_run.log'
             }
         }
 
         stage('Archive Logs') {
             steps {
                 echo '📦 Archiving logs for future reference...'
-                archiveArtifacts artifacts: 'dark_run.log', fingerprint: true
+                archiveArtifacts artifacts: 'dark_run.log', onlyIfSuccessful: true
             }
         }
     }
 
     post {
-        always {
-            echo '🎉 Pipeline complete!'
+        success {
+            echo '✅ Victory! Dark RPG completed successfully.'
+        }
+        failure {
+            echo '❌ The shadows consumed the build...'
         }
     }
 }
-
