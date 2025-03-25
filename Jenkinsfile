@@ -12,31 +12,34 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Build Docker Image') {
             steps {
-                sh 'pip install -r requirements.txt || true'
+                echo '🐳 Building Docker Image...'
+                sh 'docker build --no-cache -t dark-rpg .'
             }
         }
 
         stage('Run Game in Auto Mode') {
             steps {
-                sh 'python -m Dark_rpg.main --auto --script Dark_rpg/master_script.txt'
+                echo '🎮 Launching Dark RPG (auto mode)...'
+                sh 'docker run --rm dark-rpg'
             }
         }
 
-        stage('Post Run Cleanup') {
+        stage('Archive Logs') {
             steps {
-                echo 'RPG test run complete!'
+                echo '📦 Archiving logs for future reference...'
+                archiveArtifacts artifacts: '**/*.log', allowEmptyArchive: true
             }
         }
     }
 
     post {
-        failure {
-            echo 'The realm has fallen! Check logs for clues.'
-        }
         success {
-            echo 'Victory! The game ran as expected.'
+            echo '✅ Victory! Dark RPG completed successfully.'
+        }
+        failure {
+            echo '💀 The pipeline failed. The darkness consumes us...'
         }
     }
 }
