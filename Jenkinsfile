@@ -1,19 +1,35 @@
 pipeline {
     agent any
 
+    environment {
+        PYTHONPATH = "${WORKSPACE}/Dark_rpg"
+    }
+
     stages {
-        stage('Run Dark in Docker') {
+        stage('Checkout') {
             steps {
-                echo '🐳 Building and Running Dark RPG inside Docker container...'
-                sh 'docker build -t dark-rpg .'
-                sh 'docker run --rm dark-rpg > dark_run.log'
+                checkout scm
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                echo '🐳 Building Docker Image...'
+                sh 'docker build --no-cache -t dark-rpg .'
+            }
+        }
+
+        stage('Run Game in Auto Mode') {
+            steps {
+                echo '🎮 Launching Dark RPG (auto mode)...'
+                sh 'docker run --rm dark-rpg'
             }
         }
 
         stage('Archive Logs') {
             steps {
                 echo '📦 Archiving logs for future reference...'
-                archiveArtifacts artifacts: 'dark_run.log', onlyIfSuccessful: true
+                archiveArtifacts artifacts: '**/*.log', allowEmptyArchive: true
             }
         }
     }
@@ -23,7 +39,7 @@ pipeline {
             echo '✅ Victory! Dark RPG completed successfully.'
         }
         failure {
-            echo '❌ The shadows consumed the build...'
+            echo '💀 The pipeline failed. The darkness consumes us...'
         }
     }
 }
